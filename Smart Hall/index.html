@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Hall IoT</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --text-primary: #1C1C1E;
+            --text-secondary: #8E8E93;
+            --accent-blue: #007AFF;
+            --accent-green: #34C759;
+            --accent-orange: #FF9500;
+            --accent-red: #FF3B30;
+            --accent-indigo: #5856D6;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --radius: 22px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgb(242, 242, 247) 0%, rgb(219, 225, 241) 90%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .status-pill {
+            background: rgba(142, 142, 147, 0.1);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-pill.online {
+            background: rgba(52, 199, 89, 0.1);
+            color: var(--accent-green);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: currentColor;
+            border-radius: 50%;
+        }
+        .online .dot { animation: pulse 2s infinite; }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: transform 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .card-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .value-display {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin: 10px 0;
+            color: var(--text-primary);
+        }
+
+        .unit { font-size: 20px; color: var(--text-secondary); font-weight: 500; }
+
+        /* Specific Colors */
+        .icon-people { background: var(--accent-indigo); }
+        .icon-temp { background: var(--accent-orange); }
+        .icon-hum { background: var(--accent-blue); }
+        .icon-ldr { background: var(--text-secondary); }
+        .icon-led { background: var(--accent-orange); }
+        .icon-motor { background: var(--accent-green); }
+
+        /* Controls */
+        .control-group {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 16px;
+            padding: 15px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .row:last-child { margin-bottom: 0; }
+
+        .label { font-size: 14px; font-weight: 500; }
+        .sub-label { font-size: 12px; color: var(--text-secondary); }
+
+        .pwm-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .pwm-bar { height: 100%; border-radius: 10px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .btn {
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .btn-stop { background-color: rgba(255, 59, 48, 0.1); color: var(--accent-red); }
+        .btn-stop:hover { background-color: rgba(255, 59, 48, 0.2); }
+        .btn-stop.active { background-color: var(--accent-red); color: white; }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #E5E5EA;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background-color: var(--accent-green); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        svg { width: 22px; height: 22px; stroke-width: 2.5; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding-bottom: 80px; }
+            .value-display { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Smart Hall</h1>
+            <div class="status-pill" id="connection-status">
+                <div class="dot"></div>
+                <span id="status-text">Connecting...</span>
+            </div>
+        </div>
+
+        <!-- PEOPLE COUNT -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">Occupancy</span>
+                <div class="card-icon icon-people">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                </div>
+            </div>
+            <div class="value-display" id="val-people">--</div>
+            <div class="sub-label">Active detected</div>
+        </div>
+
+        <!-- TEMPERATURE -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">Temperature</span>
+                <div class="card-icon icon-temp">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+                </div>
+            </div>
+            <div class="value-display" id="val-temp">--<span class="unit">°C</span></div>
+            <div class="sub-label">Threshold: 30.0°C</div>
+        </div>
+
+        <!-- HUMIDITY -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">Humidity</span>
+                <div class="card-icon icon-hum">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                </div>
+            </div>
+            <div class="value-display" id="val-hum">--<span class="unit">%</span></div>
+            <div class="sub-label">Relative Humidity</div>
+        </div>
+
+        <!-- LDR / LIGHT -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">Light Level</span>
+                <div class="card-icon icon-ldr">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>
+                </div>
+            </div>
+            <div class="value-display" id="val-ldr">--</div>
+            <div class="pwm-container">
+                <div class="pwm-bar" id="bar-ldr" style="width: 0%; background-color: var(--text-secondary);"></div>
+            </div>
+        </div>
+
+        <!-- LED CONTROL -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">Lighting System</span>
+                <div class="card-icon icon-led">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.9.27-1.48.27-2.03A5.48 5.48 0 0 0 12 6.5a5.48 5.48 0 0 0-3.36 9.97c0 .55.09 1.13.27 2.03"/></svg>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="row">
+                    <span class="label">Status</span>
+                    <span class="label" id="status-led-text" style="color:var(--text-secondary)">Syncing...</span>
+                </div>
+                <div class="row">
+                    <span class="label">Power (PWM)</span>
+                    <span class="label" id="val-led-pwm">0</span>
+                </div>
+                <div class="pwm-container">
+                    <div class="pwm-bar" id="bar-led" style="width: 0%; background-color: var(--accent-orange);"></div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="row">
+                    <div>
+                        <div class="label">Manual Mode</div>
+                        <div class="sub-label">Override sensors</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-led-manual" onchange="updateControl('led', 'manual')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="row" id="manual-led-controls" style="display:none; opacity: 0.5;">
+                    <span class="label">Switch State</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-led-state" onchange="updateControl('led', 'state')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-stop" id="btn-stop-led" onclick="toggleStop('led')">Emergency Stop</button>
+        </div>
+
+        <!-- MOTOR CONTROL -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-label">HVAC / Motor</span>
+                <div class="card-icon icon-motor">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path><path d="M12 12v10"></path></svg>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="row">
+                    <span class="label">Status</span>
+                    <span class="label" id="status-motor-text" style="color:var(--text-secondary)">Syncing...</span>
+                </div>
+                <div class="row">
+                    <span class="label">Speed (PWM)</span>
+                    <span class="label" id="val-motor-pwm">0</span>
+                </div>
+                <div class="pwm-container">
+                    <div class="pwm-bar" id="bar-motor" style="width: 0%; background-color: var(--accent-green);"></div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="row">
+                    <div>
+                        <div class="label">Manual Mode</div>
+                        <div class="sub-label">Override sensors</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-motor-manual" onchange="updateControl('motor', 'manual')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="row" id="manual-motor-controls" style="display:none; opacity: 0.5;">
+                    <span class="label">Switch State</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-motor-state" onchange="updateControl('motor', 'state')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn btn-stop" id="btn-stop-motor" onclick="toggleStop('motor')">Emergency Stop</button>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // TODO: Replace with your actual Firebase project config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://app-project-7cc1a-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // References
+        const statusRef = db.ref('status');   // Read-only (from ESP)
+        const controlRef = db.ref('control'); // Write-only (to ESP)
+
+        // Local state to prevent UI jitter
+        let localControls = {
+            led: { manual: false, state: false, stop: false },
+            motor: { manual: false, state: false, stop: false }
+        };
+
+        // --- 1. LISTEN TO ESP STATUS ---
+        statusRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Update Sensors
+                document.getElementById('val-people').innerText = data.people || 0;
+                document.getElementById('val-temp').innerHTML = (data.temp || 0).toFixed(1) + '<span class="unit">°C</span>';
+                document.getElementById('val-hum').innerHTML = (data.hum || 0).toFixed(1) + '<span class="unit">%</span>';
+                document.getElementById('val-ldr').innerText = data.ldr || 0;
+
+                // Update LDR Bar
+                const ldrPercent = Math.min(100, ((data.ldr || 0) / 1024) * 100);
+                document.getElementById('bar-ldr').style.width = ldrPercent + '%';
+
+                // Update Output PWM Displays
+                document.getElementById('val-led-pwm').innerText = data.ledPWM || 0;
+                document.getElementById('bar-led').style.width = ((data.ledPWM || 0) / 255 * 100) + '%';
+                
+                document.getElementById('val-motor-pwm').innerText = data.motorPWM || 0;
+                document.getElementById('bar-motor').style.width = ((data.motorPWM || 0) / 255 * 100) + '%';
+
+                updateConnectionStatus(true);
+            }
+        });
+
+        // --- 2. LISTEN TO CONTROLS (To sync UI if changed elsewhere) ---
+        controlRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                localControls.led.manual = data.ledManual || false;
+                localControls.led.state = data.ledState || false;
+                localControls.led.stop = data.ledStop || false;
+                
+                localControls.motor.manual = data.motorManual || false;
+                localControls.motor.state = data.motorState || false;
+                localControls.motor.stop = data.motorStop || false;
+
+                refreshControlUI();
+            }
+        });
+
+        // Handle Connection Status
+        const connectedRef = db.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            if (snap.val() === true) {
+                updateConnectionStatus(true);
+            } else {
+                updateConnectionStatus(false);
+            }
+        });
+
+        function updateConnectionStatus(isOnline) {
+            const pill = document.getElementById('connection-status');
+            const text = document.getElementById('status-text');
+            if(isOnline) {
+                pill.classList.add('online');
+                text.innerText = "Live";
+            } else {
+                pill.classList.remove('online');
+                text.innerText = "Offline";
+            }
+        }
+
+        // --- 3. UI HELPERS ---
+        function refreshControlUI() {
+            ['led', 'motor'].forEach(type => {
+                const s = localControls[type];
+                const manualToggle = document.getElementById(`toggle-${type}-manual`);
+                const stateToggle = document.getElementById(`toggle-${type}-state`);
+                const controlsDiv = document.getElementById(`manual-${type}-controls`);
+                const stopBtn = document.getElementById(`btn-stop-${type}`);
+                const statusText = document.getElementById(`status-${type}-text`);
+
+                manualToggle.checked = s.manual;
+                stateToggle.checked = s.state;
+
+                // Manual Mode Visibility
+                if (s.manual) {
+                    controlsDiv.style.display = 'flex';
+                    setTimeout(() => controlsDiv.style.opacity = '1', 10);
+                    statusText.innerText = "Manual";
+                    statusText.style.color = "var(--accent-orange)";
+                } else {
+                    controlsDiv.style.opacity = '0';
+                    setTimeout(() => controlsDiv.style.display = 'none', 200);
+                    statusText.innerText = "Auto";
+                    statusText.style.color = "var(--text-secondary)";
+                }
+
+                // Stop Button Visuals
+                if (s.stop) {
+                    stopBtn.classList.add('active');
+                    stopBtn.innerText = "STOPPED (Reset)";
+                    statusText.innerText = "FORCE STOP";
+                    statusText.style.color = "var(--accent-red)";
+                    
+                    manualToggle.disabled = true;
+                    stateToggle.disabled = true;
+                    document.getElementById(`bar-${type}`).style.backgroundColor = 'var(--accent-red)';
+                } else {
+                    stopBtn.classList.remove('active');
+                    stopBtn.innerText = "Emergency Stop";
+                    manualToggle.disabled = false;
+                    stateToggle.disabled = false;
+                    const color = type === 'led' ? 'var(--accent-orange)' : 'var(--accent-green)';
+                    document.getElementById(`bar-${type}`).style.backgroundColor = color;
+                }
+            });
+        }
+
+        // --- 4. SEND COMMANDS TO FIREBASE ---
+        window.updateControl = function(type, field) {
+            const updates = {};
+            
+            if (field === 'manual') {
+                const val = document.getElementById(`toggle-${type}-manual`).checked;
+                updates[`${type}Manual`] = val;
+                // If turning manual on, default state to off
+                if(val) updates[`${type}State`] = false;
+            } 
+            else if (field === 'state') {
+                const val = document.getElementById(`toggle-${type}-state`).checked;
+                updates[`${type}State`] = val;
+            }
+
+            controlRef.update(updates);
+        };
+
+        window.toggleStop = function(type) {
+            const currentStop = localControls[type].stop;
+            const updates = {};
+            updates[`${type}Stop`] = !currentStop;
+            
+            // If turning off force stop, disable manual mode to return to auto safely
+            if (!updates[`${type}Stop`]) {
+                updates[`${type}Manual`] = false;
+            }
+            
+            controlRef.update(updates);
+        };
+
+    </script>
+</body>
+</html>

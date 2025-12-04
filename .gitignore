@@ -1,0 +1,36 @@
+# Arduino
+*.hex
+*.elf
+*.map
+
+# Build artifacts
+build/
+*.o
+*.a
+
+# IDE files
+.vscode/
+.vs/
+*.code-workspace
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Credentials
+config.h
+secrets.h
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Logs
+*.log

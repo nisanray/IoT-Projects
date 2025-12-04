@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Weather Data - History</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+      background: #f5f5f7;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: #1d1d1f;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 36px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 17px;
+      color: #6e6e73;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .record-count {
+      font-size: 15px;
+      color: #6e6e73;
+    }
+
+    .record-count strong {
+      color: #1d1d1f;
+      font-weight: 600;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #0071e3;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0077ed;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #1d1d1f;
+      border: 1px solid #d2d2d7;
+    }
+
+    .btn-secondary:hover {
+      background: #f5f5f7;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f5f5f7;
+    }
+
+    th {
+      padding: 16px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #1d1d1f;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #d2d2d7;
+    }
+
+    td {
+      padding: 14px 12px;
+      font-size: 14px;
+      color: #1d1d1f;
+      border-bottom: 1px solid #f5f5f7;
+    }
+
+    tbody tr {
+      transition: background 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background: #fafafa;
+    }
+
+    .timestamp-col {
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .value-col {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6e6e73;
+    }
+
+    .spinner {
+      border: 3px solid #f5f5f7;
+      border-top: 3px solid #0071e3;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 400px;
+      padding: 10px 16px;
+      border: 1px solid #d2d2d7;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #0071e3;
+    }
+
+    @media (max-width: 768px) {
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 900px;
+      }
+
+      .controls {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+      }
+
+      .action-bar {
+        flex-direction: column;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><i class="fas fa-database"></i> Historical Weather Data</h1>
+    <p>Complete sensor readings archive</p>
+  </div>
+
+  <div class="container">
+    <div class="controls">
+      <div class="record-count">
+        <span id="recordCount">Loading records...</span>
+      </div>
+      <div class="action-bar">
+        <input type="text" id="searchBox" class="search-box" placeholder="Search by date or time...">
+        <button class="btn btn-secondary" onclick="exportToCSV()">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+        <a href="index.html" class="btn btn-primary">
+          <i class="fas fa-home"></i> Dashboard
+        </a>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>DHT Temp (°C)</th>
+            <th>Humidity (%)</th>
+            <th>BMP Temp (°C)</th>
+            <th>Pressure (hPa)</th>
+            <th>Altitude (m)</th>
+            <th>Rain (Digital)</th>
+            <th>Rain (Analog)</th>
+            <th>LDR (Digital)</th>
+            <th>LDR (Raw)</th>
+            <th>Light (%)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="11" class="loading">
+              <div class="spinner"></div>
+              Loading data from Firebase...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // ---------------- Firebase Config ----------------
+    const firebaseConfig = {
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "https://notes-156ce-default-rtdb.firebaseio.com",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let allData = [];
+
+    // ---------------- Format timestamp ----------------
+    function formatDateTime(timestampKey) {
+      let ts = timestampKey.split('+')[0];
+      const parts = ts.split('T');
+      const dateParts = parts[0].split('-');
+      const timeParts = parts[1].split('-');
+
+      const dateObj = new Date(
+        dateParts[0], dateParts[1]-1, dateParts[2],
+        timeParts[0], timeParts[1], timeParts[2]
+      );
+
+      const dateStr = dateObj.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      const timeStr = dateObj.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true 
+      });
+
+      return `${dateStr} ${timeStr}`;
+    }
+
+    // ---------------- Load all data ----------------
+    function loadAllData() {
+      db.ref('readings').once('value', snapshot => {
+        const data = snapshot.val();
+        if (!data) {
+          document.getElementById('tableBody').innerHTML = 
+            '<tr><td colspan="11" style="text-align:center; padding:40px; color:#6e6e73;">No data available</td></tr>';
+          return;
+        }
+
+        allData = Object.entries(data).map(([key, value]) => ({
+          timestamp: key,
+          formatted: formatDateTime(key),
+          ...value
+        }));
+
+        // Sort by timestamp (newest first)
+        allData.reverse();
+
+        displayData(allData);
+        updateRecordCount(allData.length);
+      });
+    }
+
+    // ---------------- Display data in table ----------------
+    function displayData(dataArray) {
+      const tbody = document.getElementById('tableBody');
+      
+      if (dataArray.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center; padding:40px; color:#6e6e73;">No matching records</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = dataArray.map(record => `
+        <tr>
+          <td class="timestamp-col">${record.formatted}</td>
+          <td class="value-col">${record.dht_temp !== undefined ? record.dht_temp : 'N/A'}</td>
+          <td class="value-col">${record.dht_humi !== undefined ? record.dht_humi : 'N/A'}</td>
+          <td class="value-col">${record.bmp_temp !== undefined ? record.bmp_temp : 'N/A'}</td>
+          <td class="value-col">${record.bmp_pres !== undefined ? record.bmp_pres : 'N/A'}</td>
+          <td class="value-col">${record.bmp_alt !== undefined ? record.bmp_alt : 'N/A'}</td>
+          <td class="value-col">${record.rain_digital !== undefined ? record.rain_digital : 'N/A'}</td>
+          <td class="value-col">${record.rain_analog !== undefined ? record.rain_analog : 'N/A'}</td>
+          <td class="value-col">${record.ldr_digital !== undefined ? record.ldr_digital : 'N/A'}</td>
+          <td class="value-col">${record.ldr_raw !== undefined ? record.ldr_raw : 'N/A'}</td>
+          <td class="value-col">${record.ldr_pct !== undefined ? record.ldr_pct : 'N/A'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---------------- Update record count ----------------
+    function updateRecordCount(count) {
+      document.getElementById('recordCount').innerHTML = 
+        `Showing <strong>${count}</strong> record${count !== 1 ? 's' : ''}`;
+    }
+
+    // ---------------- Search functionality ----------------
+    document.getElementById('searchBox').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      if (!searchTerm) {
+        displayData(allData);
+        updateRecordCount(allData.length);
+        return;
+      }
+
+      const filtered = allData.filter(record => 
+        record.formatted.toLowerCase().includes(searchTerm)
+      );
+
+      displayData(filtered);
+      updateRecordCount(filtered.length);
+    });
+
+    // ---------------- Export to CSV ----------------
+    function exportToCSV() {
+      if (allData.length === 0) {
+        alert('No data to export');
+        return;
+      }
+
+      const headers = ['Date & Time', 'DHT Temp (°C)', 'Humidity (%)', 'BMP Temp (°C)', 'Pressure (hPa)', 'Altitude (m)', 'Rain (Digital)', 'Rain (Analog)', 'LDR (Digital)', 'LDR (Raw)', 'Light (%)'];
+      
+      const csvContent = [
+        headers.join(','),
+        ...allData.map(record => [
+          `"${record.formatted}"`,
+          record.dht_temp !== undefined ? record.dht_temp : '',
+          record.dht_humi !== undefined ? record.dht_humi : '',
+          record.bmp_temp !== undefined ? record.bmp_temp : '',
+          record.bmp_pres !== undefined ? record.bmp_pres : '',
+          record.bmp_alt !== undefined ? record.bmp_alt : '',
+          record.rain_digital !== undefined ? record.rain_digital : '',
+          record.rain_analog !== undefined ? record.rain_analog : '',
+          record.ldr_digital !== undefined ? record.ldr_digital : '',
+          record.ldr_raw !== undefined ? record.ldr_raw : '',
+          record.ldr_pct !== undefined ? record.ldr_pct : ''
+        ].join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `weather_data_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+
+    loadAllData();
+  </script>
+</body>
+</html>
