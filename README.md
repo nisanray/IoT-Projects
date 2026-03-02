@@ -1,18 +1,17 @@
 # IoT Projects Collection
 
 ![IoT](https://img.shields.io/badge/Category-Internet%20of%20Things-blue)
-![Platform](https://img.shields.io/badge/Platform-ESP8266%20%7C%20Arduino-green)
+![Platform](https://img.shields.io/badge/Platform-ESP8266%20%7C%20Arduino%20%7C%20Raspberry%20Pi-green)
 ![Database](https://img.shields.io/badge/Database-Firebase%20RTDB-orange)
 ![Status](https://img.shields.io/badge/Status-Active-success)
 
 ## 📋 Overview
 
-A comprehensive collection of Internet of Things (IoT) projects demonstrating real-world applications of microcontroller programming, sensor integration, cloud connectivity, and web-based monitoring systems. Each project showcases professional development practices with complete documentation, circuit diagrams, and production-ready code.
+A comprehensive collection of Internet of Things (IoT) projects demonstrating real-world applications of microcontroller and Raspberry Pi programming, sensor integration, cloud connectivity, and web-based monitoring systems. Each project showcases professional development practices with complete documentation, circuit diagrams, and production-ready code.
 
 ## 🗂️ Projects
 
-### 1. 🌐 NodeMCU Firebase RTDB Template
-**Path:** `NodeMCU_RTDB_/`
+### 1. 🌐 [NodeMCU Firebase RTDB Template](NodeMCU_RTDB_/README.md)
 
 A foundational template demonstrating ESP8266 WiFi connectivity and Firebase Realtime Database integration.
 
@@ -32,8 +31,7 @@ A foundational template demonstrating ESP8266 WiFi connectivity and Firebase Rea
 
 ---
 
-### 2. 🏠 Smart Hall IoT Automation System
-**Path:** `Smart Hall/`
+### 2. 🏠 [Smart Hall IoT Automation System](Smart%20Hall/README.md)
 
 An intelligent building automation system with occupancy detection, environmental monitoring, and automatic lighting/HVAC control.
 
@@ -59,8 +57,7 @@ An intelligent building automation system with occupancy detection, environmenta
 
 ---
 
-### 3. 🌦️ Weather Monitoring Station
-**Path:** `Weather Monitoring/`
+### 3. 🌦️ [Weather Monitoring Station](Weather%20Monitoring/README.md)
 
 A multi-sensor environmental monitoring system with dual microcontrollers for comprehensive data logging and cloud storage.
 
@@ -84,6 +81,31 @@ A multi-sensor environmental monitoring system with dual microcontrollers for co
 **Use Case:** Weather station, environmental monitoring, climate data collection
 
 [📖 Full Documentation](Weather%20Monitoring/README.md)
+
+---
+
+### 4. 🤖 [NEMO - AI Robot Buddy](NEMO%20-%20Ai%20Robot%20Buddy/Readme.md)
+
+An advanced Raspberry Pi robot platform integrating motion control, computer vision, audio perception, expression display, and network interaction.
+
+**Key Features:**
+- Multi-servo control with calibration and safe-range testing
+- Choreographed robot movement and dance routines
+- Camera streaming, face detection, and vision-audio integration
+- Speech-to-text, text-to-speech, and microphone recording workflows
+- OLED display output for visual expressions and status
+- Modular architecture across motor, vision, audio, display, and networking
+
+**Hardware:**
+- Raspberry Pi (2B/3B/4B/Zero)
+- MG996R or compatible servo motors
+- Camera module or USB camera
+- INMP441 I2S microphone or USB microphone
+- SSD1306 OLED display (I2C)
+
+**Use Case:** Interactive robotics, educational AI/robotics experiments, multimodal human-robot interaction
+
+[📖 Full Documentation](NEMO%20-%20Ai%20Robot%20Buddy/Readme.md)
 
 ---
 
@@ -129,6 +151,7 @@ A multi-sensor environmental monitoring system with dual microcontrollers for co
 ### Hardware Platforms
 - **NodeMCU ESP8266** - WiFi-enabled microcontroller (ESP-12E module)
 - **Arduino Uno** - ATmega328P for multi-sensor applications
+- **Raspberry Pi** - Linux-based SBC for robotics, vision, and audio processing
 
 ### Communication Protocols
 - **WiFi** - 2.4GHz 802.11 b/g/n
@@ -142,6 +165,7 @@ A multi-sensor environmental monitoring system with dual microcontrollers for co
 
 ### Programming
 - **Arduino C/C++** - Firmware development
+- **Python** - Robotics, vision, audio, and hardware integration
 - **HTML/CSS/JavaScript** - Web dashboards
 - **Firebase SDK** - Cloud integration
 
@@ -193,16 +217,15 @@ Each project folder contains:
 
 ## 📊 Project Comparison
 
-| Feature | NodeMCU Template | Smart Hall | Weather Station |
-|---------|------------------|------------|-----------------|
-| **Complexity** | Beginner | Intermediate | Advanced |
-| **Microcontrollers** | 1 (ESP8266) | 1 (ESP8266) | 2 (Uno + ESP8266) |
-| **Sensors** | None (template) | 4 (DHT, IR×2, LDR) | 4 (DHT, BMP, Rain, LDR) |
-| **Outputs** | None | 2 (LED, Motor) | None |
-| **Web Interface** | No | Yes (Control) | Yes (Monitor) |
-| **Data Logging** | Yes | Status only | Yes (Historical) |
-| **Real-time Control** | No | Yes | No |
-| **Setup Time** | 30 min | 2-3 hours | 3-4 hours |
+| Feature | NodeMCU Template | Smart Hall | Weather Station | NEMO Robot Buddy |
+|---------|------------------|------------|-----------------|------------------|
+| **Complexity** | Beginner | Intermediate | Advanced | Advanced+ |
+| **Controller Platform** | 1 (ESP8266) | 1 (ESP8266) | 2 (Uno + ESP8266) | 1 (Raspberry Pi) |
+| **Sensors / Perception** | None (template) | 4 (DHT, IR×2, LDR) | 4 (DHT, BMP, Rain, LDR) | Camera + Mic + optional sensors |
+| **Actuators / Outputs** | None | 2 (LED, Motor) | None | Multi-servo + OLED + audio |
+| **Web/Network Features** | No | Yes (Control) | Yes (Monitor) | Yes (streaming + servers) |
+| **Data/Interaction Mode** | Cloud sync template | Real-time automation | Historical monitoring | Multimodal robot interaction |
+| **Setup Time** | 30 min | 2-3 hours | 3-4 hours | 4-8 hours |
 
 ## 🛠️ Common Components
 
@@ -243,6 +266,13 @@ Each project folder contains:
    - Serial inter-MCU communication
    - Complex data structures
    - Historical data management
+
+4. **Specialize with:** NEMO - AI Robot Buddy
+   - Raspberry Pi robotics workflows
+   - Servo choreography and calibration
+   - Computer vision and live streaming
+   - Speech and audio pipeline integration
+   - Full-system modular integration
 
 ## 🔐 Security Considerations
 
@@ -354,6 +384,6 @@ For project-specific help, refer to individual project README files. Each contai
 ---
 
 **⚡ Quick Links:**
-- [NodeMCU Template](NodeMCU_RTDB_/) | [Smart Hall](Smart%20Hall/) | [Weather Station](Weather%20Monitoring/)
+- [NodeMCU Template](NodeMCU_RTDB_/) | [Smart Hall](Smart%20Hall/) | [Weather Station](Weather%20Monitoring/) | [NEMO Robot Buddy](NEMO%20-%20Ai%20Robot%20Buddy/)
 
 **🎯 Remember:** Start simple, test thoroughly, and build incrementally. Each project builds on the previous one's concepts!
