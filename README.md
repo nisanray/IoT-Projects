@@ -1,7 +1,7 @@
 # IoT Projects Collection
 
 ![IoT](https://img.shields.io/badge/Category-Internet%20of%20Things-blue)
-![Platform](https://img.shields.io/badge/Platform-ESP8266%20%7C%20Arduino%20%7C%20Raspberry%20Pi-green)
+![Platform](https://img.shields.io/badge/Platform-ESP8266%20%7C%20Arduino%20%7C%20Raspberry%20Pi%20%7C%20Flutter-green)
 ![Database](https://img.shields.io/badge/Database-Firebase%20RTDB-orange)
 ![Status](https://img.shields.io/badge/Status-Active-success)
 
@@ -109,6 +109,29 @@ An advanced Raspberry Pi robot platform integrating motion control, computer vis
 
 ---
 
+### 5. 📱 [Weather Info (Flutter + NodeMCU + Firebase)](https://github.com/nisanray/Weather-Info)
+
+A real-time weather monitoring platform that combines NodeMCU sensor data acquisition with Firebase Realtime Database and a responsive Flutter dashboard.
+
+**Key Features:**
+- Multi-sensor weather capture: DHT11, BMP280, rain sensor, and LDR
+- NodeMCU uploads JSON sensor payloads to Firebase every 10 seconds
+- Secure Firebase upload flow using authentication
+- Live dashboard with latest readings and status indicators
+- Historical entries view with data management (refresh/delete latest/delete all)
+- Responsive Flutter UI for mobile, tablet, desktop, and web
+
+**Hardware/Software Stack:**
+- NodeMCU ESP8266 + weather sensors
+- Firebase Realtime Database
+- Flutter application (`lib/main.dart`) for visualization and control
+
+**Use Case:** End-to-end IoT weather observability with cross-platform app-based monitoring
+
+[📖 Full Documentation](https://github.com/nisanray/Weather-Info)
+
+---
+
 ## 🏗️ Architecture Overview
 
 ```
@@ -166,6 +189,7 @@ An advanced Raspberry Pi robot platform integrating motion control, computer vis
 ### Programming
 - **Arduino C/C++** - Firmware development
 - **Python** - Robotics, vision, audio, and hardware integration
+- **Dart/Flutter** - Cross-platform IoT dashboards and mobile/web interfaces
 - **HTML/CSS/JavaScript** - Web dashboards
 - **Firebase SDK** - Cloud integration
 
@@ -384,6 +408,6 @@ For project-specific help, refer to individual project README files. Each contai
 ---
 
 **⚡ Quick Links:**
-- [NodeMCU Template](NodeMCU_RTDB_/) | [Smart Hall](Smart%20Hall/) | [Weather Station](Weather%20Monitoring/) | [NEMO Robot Buddy](NEMO%20-%20Ai%20Robot%20Buddy/)
+- [NodeMCU Template](NodeMCU_RTDB_/) | [Smart Hall](Smart%20Hall/) | [Weather Station](Weather%20Monitoring/) | [NEMO Robot Buddy](NEMO%20-%20Ai%20Robot%20Buddy/) | [Weather Info](https://github.com/nisanray/Weather-Info)
 
 **🎯 Remember:** Start simple, test thoroughly, and build incrementally. Each project builds on the previous one's concepts!
